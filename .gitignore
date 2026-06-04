@@ -1,0 +1,28 @@
+# Database
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# Reports output
+reports/*.png
+reports/*.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
