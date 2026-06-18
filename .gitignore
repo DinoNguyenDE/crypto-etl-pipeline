@@ -6,6 +6,7 @@ data/*.db-wal
 # Reports output
 reports/*.png
 reports/*.txt
+reports/*.html
 
 # Python
 __pycache__/
