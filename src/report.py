@@ -74,7 +74,7 @@ TOTAL RECORDS IN SNAPSHOT: {len(df)}
 def generate_html_report(df: pd.DataFrame):
     os.makedirs("reports", exist_ok=True)
 
-    run_time = str(df["ingested_at"].iloc[0]) if "ingested_at" in df.columns else "—"
+    run_time = str(df["ingested_at"].iloc[0]) if "ingested_at" in df.columns else "â"
     total_records = len(df)
     top_gainer = df.nlargest(1, "price_change_percentage_24h").iloc[0]
     top_loser  = df.nsmallest(1, "price_change_percentage_24h").iloc[0]
@@ -87,7 +87,7 @@ def generate_html_report(df: pd.DataFrame):
     df_ch = df.sort_values("symbol")
     ch_labels = json.dumps(df_ch["symbol"].str.upper().tolist())
     ch_values = json.dumps(df_ch["price_change_percentage_24h"].round(2).tolist())
-    ch_colors = json.dumps(["#10b981" if v > 0 else "#f43f5e"
+    ch_colors = json.dumps(["#10b981" if v > 0 else "#ef4444"
                             for v in df_ch["price_change_percentage_24h"]])
 
     top10 = df.sort_values("market_cap", ascending=False).head(10)
@@ -114,188 +114,239 @@ def generate_html_report(df: pd.DataFrame):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crypto ETL Pipeline — Dashboard</title>
+<title>Crypto ETL Pipeline &mdash; Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {{
-  --bg:     #f1f5f9;
-  --surf:   #ffffff;
-  --border: #e2e8f0;
-  --text:   #1e293b;
-  --t2:     #64748b;
-  --accent: #6366f1;
-  --a2:     #818cf8;
-  --buy:    #10b981;
-  --sell:   #f43f5e;
-  --hdr:    #1e293b;
+  --bg:    #06080f;
+  --surf:  #0c1220;
+  --surf2: #131e30;
+  --brd:   #1a2d48;
+  --txt:   #d9e4f0;
+  --t2:    #617799;
+  --sky:   #38bdf8;
+  --buy:   #10b981;
+  --sell:  #ef4444;
+  --warn:  #f59e0b;
 }}
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-body {{ background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 14px; }}
-.header {{
-  background: var(--hdr); color: #f8fafc;
-  padding: 16px 32px; display: flex; align-items: center; justify-content: space-between;
+body {{ background: var(--bg); color: var(--txt); font-family: 'Inter', system-ui, sans-serif; font-size: 14px; }}
+
+/* HEADER */
+.hdr {{
+  background: var(--surf); border-bottom: 1px solid var(--brd);
+  padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
 }}
-.header-left {{ display: flex; align-items: center; gap: 12px; }}
-.header-icon {{
-  width: 36px; height: 36px; background: var(--accent);
-  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+.hdr-brand {{ display: flex; align-items: center; gap: 10px; }}
+.hdr-icon {{
+  width: 30px; height: 30px; border: 1.5px solid var(--sky); border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
 }}
-.header-title {{ font-size: 1.05rem; font-weight: 700; }}
-.header-sub {{ font-size: 0.72rem; color: #94a3b8; margin-top: 1px; }}
-.status-badge {{
-  background: rgba(16,185,129,.15); color: #10b981;
-  border: 1px solid rgba(16,185,129,.3);
-  border-radius: 20px; padding: 4px 12px; font-size: 0.75rem; font-weight: 600;
+.hdr-name {{ font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; }}
+.hdr-name em {{ color: var(--t2); font-style: normal; font-weight: 400; }}
+.hdr-right {{
+  display: flex; align-items: center; gap: 12px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--t2);
+}}
+.ok-badge {{
   display: flex; align-items: center; gap: 6px;
+  background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.22);
+  border-radius: 3px; padding: 4px 10px; color: var(--buy);
 }}
-.sdot {{ width: 6px; height: 6px; background: #10b981; border-radius: 50%; }}
-.wrap {{ max-width: 1320px; margin: 0 auto; padding: 24px 28px 48px; }}
-.cards {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }}
+.ok-dot {{ width: 5px; height: 5px; border-radius: 50%; background: var(--buy); box-shadow: 0 0 6px var(--buy); }}
+
+/* MAIN */
+.wrap {{ max-width: 1300px; margin: 0 auto; padding: 24px 28px 52px; }}
+
+/* CARDS */
+.cards {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 28px; }}
 .card {{
-  background: var(--surf); border: 1px solid var(--border);
-  border-radius: 10px; padding: 16px 20px;
+  background: var(--surf); border: 1px solid var(--brd);
+  border-top: 2px solid transparent; border-radius: 6px; padding: 16px 18px;
 }}
-.clabel {{ font-size: 0.68rem; font-weight: 600; color: var(--t2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }}
-.cvalue {{ font-size: 1.65rem; font-weight: 700; line-height: 1; }}
-.csub {{ font-size: 0.72rem; color: var(--t2); margin-top: 5px; }}
-.card-a {{ border-top: 3px solid var(--accent); }}
-.card-b {{ border-top: 3px solid var(--buy); }}
-.card-c {{ border-top: 3px solid var(--sell); }}
-.card-d {{ border-top: 3px solid #f59e0b; }}
-.stitle {{
-  font-size: 0.7rem; font-weight: 700; color: var(--t2);
-  text-transform: uppercase; letter-spacing: 1.2px;
-  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+.card-sky  {{ border-top-color: var(--sky); }}
+.card-buy  {{ border-top-color: var(--buy); }}
+.card-sell {{ border-top-color: var(--sell); }}
+.card-warn {{ border-top-color: var(--warn); }}
+.clbl {{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--t2); margin-bottom: 10px;
 }}
-.stitle::after {{ content: ''; flex: 1; height: 1px; background: var(--border); }}
-.charts-row {{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }}
+.cval {{ font-family: 'IBM Plex Mono', monospace; font-size: 2rem; font-weight: 600; line-height: 1; }}
+.card-sky  .cval {{ color: var(--sky); }}
+.card-buy  .cval {{ color: var(--buy); }}
+.card-sell .cval {{ color: var(--sell); }}
+.card-warn .cval {{ color: var(--warn); }}
+.csub {{ font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--t2); margin-top: 6px; }}
+
+/* SECTION HEADER */
+.sec {{ display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }}
+.sec-txt {{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.62rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--t2); white-space: nowrap;
+}}
+.sec-line {{ flex: 1; height: 1px; background: var(--brd); }}
+
+/* PIPELINE */
+.pipe-wrap {{
+  background: var(--surf); border: 1px solid var(--brd); border-radius: 6px;
+  padding: 22px 24px; margin-bottom: 28px;
+  display: flex; align-items: center;
+}}
+.pipe-stage {{
+  flex: 1; background: var(--surf2); border: 1px solid var(--brd);
+  border-radius: 6px; padding: 16px 18px; position: relative;
+}}
+.pipe-stage-num {{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem; font-weight: 500; color: var(--sky);
+  letter-spacing: 0.12em; margin-bottom: 4px;
+}}
+.pipe-stage-name {{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1rem; font-weight: 600; color: var(--txt);
+}}
+.pipe-stage-sub {{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem; color: var(--t2); margin-top: 3px;
+}}
+.pipe-status {{
+  position: absolute; top: 12px; right: 12px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--buy); box-shadow: 0 0 7px var(--buy);
+}}
+.pipe-conn {{
+  width: 48px; flex-shrink: 0; height: 2px;
+  margin: 0 -1px; position: relative; overflow: hidden;
+  background: var(--brd);
+}}
+.pipe-conn::after {{
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 200%; height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0, transparent 6px,
+    var(--sky) 6px, var(--sky) 12px
+  );
+  animation: flow-dash 0.9s linear infinite;
+}}
+@keyframes flow-dash {{ to {{ transform: translateX(50%); }} }}
+
+/* CHARTS */
+.charts-row {{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 28px; }}
 .chart-card {{
-  background: var(--surf); border: 1px solid var(--border);
-  border-radius: 10px; padding: 16px 18px;
+  background: var(--surf); border: 1px solid var(--brd); border-radius: 6px; padding: 14px 16px;
 }}
-.chart-title {{ font-size: 0.82rem; font-weight: 600; color: var(--text); margin-bottom: 12px; }}
-.chart-wrap {{ height: 240px; position: relative; }}
-.flow-section {{
-  background: var(--surf); border: 1px solid var(--border);
-  border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;
+.chart-title {{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem; font-weight: 500; color: var(--t2);
+  margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.08em;
 }}
-.flow {{ display: flex; align-items: center; gap: 0; }}
-.flow-step {{
-  flex: 1; background: var(--bg); border: 1px solid var(--border);
-  border-radius: 8px; padding: 14px 16px; position: relative;
-}}
-.flow-step-icon {{ font-size: 1.4rem; margin-bottom: 4px; }}
-.flow-step-name {{ font-weight: 700; font-size: 0.88rem; color: var(--text); }}
-.flow-step-sub {{ font-size: 0.72rem; color: var(--t2); margin-top: 2px; }}
-.flow-step-status {{
-  position: absolute; top: 10px; right: 10px;
-  width: 8px; height: 8px; border-radius: 50%; background: var(--buy);
-  box-shadow: 0 0 6px var(--buy);
-}}
-.flow-arrow {{
-  width: 36px; flex-shrink: 0; text-align: center;
-  color: var(--t2); font-size: 1.1rem;
-}}
-.table-wrap {{
-  background: var(--surf); border: 1px solid var(--border);
-  border-radius: 10px; overflow: hidden; margin-bottom: 24px;
-}}
+.chart-wrap {{ height: 220px; position: relative; }}
+
+/* TABLE */
+.tbl-outer {{ border: 1px solid var(--brd); border-radius: 6px; overflow: hidden; margin-bottom: 24px; }}
 table {{ width: 100%; border-collapse: collapse; font-size: 0.86rem; }}
 thead th {{
-  background: #f8fafc; padding: 10px 16px;
-  text-align: left; font-size: 0.68rem; font-weight: 600;
-  color: var(--t2); text-transform: uppercase; letter-spacing: .8px;
-  border-bottom: 1px solid var(--border);
+  background: var(--surf2); padding: 9px 14px; text-align: left;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem; font-weight: 500; color: var(--t2);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--brd);
 }}
-tbody td {{ padding: 11px 16px; border-bottom: 1px solid var(--border); }}
+tbody td {{ padding: 10px 14px; border-bottom: 1px solid rgba(26,45,72,.5); }}
 tbody tr:last-child td {{ border-bottom: none; }}
-tbody tr:hover td {{ background: #f8fafc; }}
+tbody tr:hover td {{ background: rgba(19,30,48,.6); }}
 .cname {{ font-weight: 600; }}
-.csym {{ font-size: 0.7rem; color: var(--t2); margin-left: 5px; }}
-.num {{ font-variant-numeric: tabular-nums; }}
-.t2 {{ color: var(--t2); }}
-.pos {{ color: var(--buy); font-weight: 500; }}
-.neg {{ color: var(--sell); font-weight: 500; }}
-footer {{ text-align: center; color: var(--t2); font-size: 0.7rem; border-top: 1px solid var(--border); padding-top: 16px; }}
+.csym  {{ font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; color: var(--t2); margin-left: 5px; }}
+.num   {{ font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }}
+.t2    {{ color: var(--t2); }}
+.pos   {{ color: var(--buy); }}
+.neg   {{ color: var(--sell); }}
+
+footer {{
+  border-top: 1px solid var(--brd); padding-top: 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem; color: var(--t2); text-align: center;
+}}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-left">
-    <div class="header-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+<div class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-icon">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5">
         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
       </svg>
     </div>
-    <div>
-      <div class="header-title">Crypto ETL Pipeline</div>
-      <div class="header-sub">Last run: {run_time}</div>
-    </div>
+    <div class="hdr-name">ETL<em>/CRYPTO</em></div>
   </div>
-  <div class="status-badge">
-    <div class="sdot"></div>
-    Completed
+  <div class="hdr-right">
+    <span>Run: {run_time}</span>
+    <div class="ok-badge"><div class="ok-dot"></div>Completed</div>
   </div>
 </div>
 
 <div class="wrap">
 
   <div class="cards">
-    <div class="card card-a">
-      <div class="clabel">Records Loaded</div>
-      <div class="cvalue" style="color:var(--accent)">{total_records}</div>
+    <div class="card card-sky">
+      <div class="clbl">Records Loaded</div>
+      <div class="cval">{total_records}</div>
       <div class="csub">Coins in snapshot</div>
     </div>
-    <div class="card card-b">
-      <div class="clabel">Top Gainer 24h</div>
-      <div class="cvalue" style="color:var(--buy)">{top_gainer['symbol'].upper()}</div>
+    <div class="card card-buy">
+      <div class="clbl">Top Gainer 24h</div>
+      <div class="cval">{top_gainer['symbol'].upper()}</div>
       <div class="csub">+{top_gainer['price_change_percentage_24h']:.2f}%</div>
     </div>
-    <div class="card card-c">
-      <div class="clabel">Top Loser 24h</div>
-      <div class="cvalue" style="color:var(--sell)">{top_loser['symbol'].upper()}</div>
+    <div class="card card-sell">
+      <div class="clbl">Top Loser 24h</div>
+      <div class="cval">{top_loser['symbol'].upper()}</div>
       <div class="csub">{top_loser['price_change_percentage_24h']:.2f}%</div>
     </div>
-    <div class="card card-d">
-      <div class="clabel">Avg Market Cap</div>
-      <div class="cvalue" style="color:#f59e0b">${avg_mcap_b:.1f}B</div>
+    <div class="card card-warn">
+      <div class="clbl">Avg Market Cap</div>
+      <div class="cval">${avg_mcap_b:.1f}B</div>
       <div class="csub">Across all coins</div>
     </div>
   </div>
 
-  <div class="stitle">ETL Pipeline Status</div>
-  <div class="flow-section">
-    <div class="flow">
-      <div class="flow-step">
-        <div class="flow-step-status"></div>
-        <div class="flow-step-icon">⬇</div>
-        <div class="flow-step-name">Extract</div>
-        <div class="flow-step-sub">CoinGecko API</div>
-      </div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-step">
-        <div class="flow-step-status"></div>
-        <div class="flow-step-icon">⚙</div>
-        <div class="flow-step-name">Transform</div>
-        <div class="flow-step-sub">pandas · feature eng.</div>
-      </div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-step">
-        <div class="flow-step-status"></div>
-        <div class="flow-step-icon">💾</div>
-        <div class="flow-step-name">Load</div>
-        <div class="flow-step-sub">SQLite database</div>
-      </div>
+  <div class="sec"><div class="sec-txt">ETL Pipeline Status</div><div class="sec-line"></div></div>
+  <div class="pipe-wrap">
+    <div class="pipe-stage">
+      <div class="pipe-status"></div>
+      <div class="pipe-stage-num">01 &middot; EXTRACT</div>
+      <div class="pipe-stage-name">Extract</div>
+      <div class="pipe-stage-sub">CoinGecko API</div>
+    </div>
+    <div class="pipe-conn"></div>
+    <div class="pipe-stage">
+      <div class="pipe-status"></div>
+      <div class="pipe-stage-num">02 &middot; TRANSFORM</div>
+      <div class="pipe-stage-name">Transform</div>
+      <div class="pipe-stage-sub">pandas &middot; feature eng.</div>
+    </div>
+    <div class="pipe-conn"></div>
+    <div class="pipe-stage">
+      <div class="pipe-status"></div>
+      <div class="pipe-stage-num">03 &middot; LOAD</div>
+      <div class="pipe-stage-name">Load</div>
+      <div class="pipe-stage-sub">SQLite database</div>
     </div>
   </div>
 
-  <div class="stitle">Market Overview</div>
+  <div class="sec"><div class="sec-txt">Market Overview</div><div class="sec-line"></div></div>
   <div class="charts-row">
     <div class="chart-card">
-      <div class="chart-title">Market Cap Ranking (Billion USD)</div>
+      <div class="chart-title">Market Cap Ranking (B USD)</div>
       <div class="chart-wrap"><canvas id="mcChart"></canvas></div>
     </div>
     <div class="chart-card">
@@ -304,19 +355,19 @@ footer {{ text-align: center; color: var(--t2); font-size: 0.7rem; border-top: 1
     </div>
   </div>
 
-  <div class="stitle">Top 10 by Market Cap</div>
-  <div class="table-wrap">
+  <div class="sec"><div class="sec-txt">Top 10 by Market Cap</div><div class="sec-line"></div></div>
+  <div class="tbl-outer">
     <table>
       <thead>
-        <tr><th>#</th><th>Asset</th><th>Price</th><th>24h %</th><th>Market Cap</th></tr>
+        <tr><th>#</th><th>Asset</th><th>Price</th><th>24h &Delta;</th><th>Market Cap</th></tr>
       </thead>
-      <tbody>
+  2   <tbody>
         {rows_html}
       </tbody>
     </table>
   </div>
 
-  <footer>Generated {now_utc} &nbsp;&middot;&nbsp; Data: CoinGecko &nbsp;&middot;&nbsp; Not financial advice.</footer>
+  <footer>ETL/CRYPTO &nbsp;&middot;&nbsp; Generated {now_utc} &nbsp;&middot;&nbsp; Data: CoinGecko &nbsp;&middot;&nbsp; Not financial advice.</footer>
 </div>
 
 <script>
@@ -334,72 +385,26 @@ new Chart(document.getElementById('mcChart'), {{
       data: mcValues,
       backgroundColor: function(ctx) {{
         var chart = ctx.chart, a = chart.chartArea;
-        if (!a) return 'rgba(99,102,241,0.7)';
+        if (!a) return 'rgba(56,189,248,0.5)';
         var g = chart.ctx.createLinearGradient(a.left, 0, a.right, 0);
-        g.addColorStop(0, 'rgba(99,102,241,0.2)');
-        g.addColorStop(1, 'rgba(99,102,241,0.85)');
+        g.addColorStop(0, 'rgba(56,189,248,0.1)');
+        g.addColorStop(1, 'rgba(56,189,248,0.7)');
         return g;
       }},
-      borderRadius: 4, borderSkipped: false
+      borderRadius: 2, borderSkipped: false
     }}]
   }},
   options: {{
     indexAxis: 'y',
     responsive: true, maintainAspectRatio: false,
-    plugins: {{ legend: {{ display: false }}, tooltip: {{ callbacks: {{ label: function(i) {{ return ' $' + i.raw + 'B'; }} }} }} }},
+    plugins: {{
+      legend: {{ display: false }},
+      tooltip: {{ callbacks: {{ label: function(i) {{ return ' $' + i.raw + 'B'; }} }} }}
+    }},
     scales: {{
-      x: {{ grid: {{ color: 'rgba(226,232,240,0.8)' }}, ticks: {{ color: '#64748b', font: {{ size: 10 }} }} }},
-      y: {{ grid: {{ display: false }}, ticks: {{ color: '#1e293b', font: {{ size: 11, weight: '600' }} }} }}
-    }}
-  }}
-}});
-
-new Chart(document.getElementById('chChart'), {{
-  type: 'bar',
-  data: {{
-    labels: chLabels,
-    datasets: [{{
-      data: chValues,
-      backgroundColor: chColors,
-      borderRadius: 4, borderSkipped: false
-    }}]
-  }},
-  options: {{
-    responsive: true, maintainAspectRatio: false,
-    plugins: {{ legend: {{ display: false }}, tooltip: {{ callbacks: {{ label: function(i) {{ var s = i.raw > 0 ? '+' : ''; return ' ' + s + i.raw + '%'; }} }} }} }},
-    scales: {{
-      x: {{ grid: {{ display: false }}, ticks: {{ color: '#1e293b', font: {{ size: 10, weight: '600' }} }} }},
+      x: {{
+        grid: {{ color: 'rgba(26,45,72,0.8)' }},
+        ticks: {{ color: '#617799', font: {{ family: 'IBM Plex Mono, monospace', size: 9 }} }}
+      }},
       y: {{
-        grid: {{ color: 'rgba(226,232,240,0.8)' }},
-        ticks: {{ color: '#64748b', font: {{ size: 10 }}, callback: function(v) {{ return v + '%'; }} }},
-        afterDataLimits: function(axis) {{ var m = Math.max(Math.abs(axis.min), Math.abs(axis.max)) * 1.1; axis.min = -m; axis.max = m; }}
-      }}
-    }}
-  }}
-}});
-</script>
-</body>
-</html>"""
-
-    path = "reports/etl_dashboard.html"
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(html)
-    print(f"HTML dashboard saved: {path}")
-    return path
-
-
-def generate_report():
-    df = _latest_snapshot()
-    if df.empty:
-        print("No data found. Run the pipeline first: python main.py --run")
-        return
-
-    chart_path = generate_charts(df)
-    summary = generate_text_summary(df)
-
-    with open("reports/summary.txt", "w", encoding="utf-8") as f:
-        f.write(summary)
-
-    print(summary)
-    print(f"Chart saved: {chart_path}")
-    return df
+        grid: {{ display: fa
